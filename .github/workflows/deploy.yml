@@ -1,0 +1,59 @@
+# Publica el FRONTEND (carpeta web/) en GitHub Pages con cada push a "main".
+# La API se publica aparte, en Render.
+name: Publicar el frontend en GitHub Pages
+
+on:
+  push:
+    branches: ['main']
+    # Solo se ejecuta si cambió algo del frontend o este archivo
+    paths: ['web/**', '.github/workflows/deploy.yml']
+  # Permite ejecutarlo a mano desde la pestaña Actions
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: 'pages'
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    # Todos los comandos "run" se ejecutan dentro de la carpeta web/
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Instalar Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 24
+          cache: 'npm'
+          cache-dependency-path: web/package-lock.json
+      - name: Instalar dependencias
+        run: npm ci
+      - name: Revisar el código (lint)
+        run: npm run lint
+      - name: Compilar la aplicación (incluye la revisión de tipos)
+        run: npm run build
+        env:
+          # Dirección de la API en Render. Se guarda como "variable"
+          # del repositorio (Settings > Secrets and variables > Actions).
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
+      - name: Configurar Pages
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6
+      - name: Subir la carpeta compilada
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5
+        with:
+          path: './web/dist'
+      - name: Publicar en GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5

@@ -1,0 +1,36 @@
+# INTEGRACIÓN CONTINUA: ejecuta las pruebas de la API en cada push.
+# Si una prueba falla, GitHub muestra una ❌ en el commit.
+# No necesita la base de datos real: las pruebas usan PostgreSQL en memoria (PGlite).
+name: Pruebas de la API
+
+on:
+  push:
+    branches: ['main']
+    paths: ['api/**', 'database/**', '.github/workflows/test.yml']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: api
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Instalar Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 24
+          cache: 'npm'
+          cache-dependency-path: api/package-lock.json
+      - name: Instalar dependencias
+        run: npm ci
+      - name: Revisar los tipos de TypeScript
+        run: npm run typecheck
+      - name: Ejecutar las pruebas
+        run: npm test
