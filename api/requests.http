@@ -1,0 +1,80 @@
+# ==========================================================
+# Pruebas manuales de la API con REST Client.
+# ==========================================================
+
+@api = http://localhost:3000/api
+
+### 1. ¿La API está viva?
+GET {{api}}/health
+
+### 2. Registrar un cliente
+# @name register
+POST {{api}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Cliente Prueba",
+  "email": "cliente@prueba.com",
+  "password": "clave-segura-123"
+}
+
+### 3. Registrar el mismo correo otra vez (debe responder 409)
+POST {{api}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Otra Persona",
+  "email": "CLIENTE@prueba.com",
+  "password": "otra-clave-456"
+}
+
+### 4. Registro con datos inválidos (debe responder 400)
+POST {{api}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "A",
+  "email": "no-es-un-correo",
+  "password": "123"
+}
+
+### 5. Intentar registrarse como admin (el rol se IGNORA: queda como customer)
+POST {{api}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Pícaro",
+  "email": "picaro@prueba.com",
+  "password": "quiero-ser-admin",
+  "role": "admin"
+}
+
+### 6. Iniciar sesión
+# @name login
+POST {{api}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "cliente@prueba.com",
+  "password": "clave-segura-123"
+}
+
+### 7. Contraseña incorrecta (debe responder 401)
+POST {{api}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "cliente@prueba.com",
+  "password": "clave-equivocada"
+}
+
+### 8. ¿Quién soy? CON token (usa el token del inicio de sesión de la prueba 6)
+GET {{api}}/auth/me
+Authorization: Bearer {{login.response.body.token}}
+
+### 9. ¿Quién soy? SIN token (debe responder 401)
+GET {{api}}/auth/me
+
+### 10. ¿Quién soy? con un token FALSO (debe responder 401)
+GET {{api}}/auth/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwicm9sZSI6ImFkbWluIn0.firma-falsa

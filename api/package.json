@@ -1,0 +1,28 @@
+{
+  "name": "reservas-canchas-api",
+  "version": "1.0.0",
+  "description": "API REST del sistema de reservas de canchas deportivas",
+  "type": "module",
+  "main": "src/server.ts",
+  "scripts": {
+    "dev": "node --env-file=.env --watch src/server.ts",
+    "start": "node src/server.ts",
+    "typecheck": "tsc",
+    "create-admin": "node --env-file=.env scripts/create-admin.ts"
+  },
+  "engines": {
+    "node": "24.x"
+  },
+  "dependencies": {
+    "express": "^5.3.0",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.23.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^24.0.0",
+    "@types/pg": "^8.23.1",
+    "typescript": "^7.0.2"
+  }
+}

@@ -1,0 +1,14 @@
+# Paquetes descargados (se recrean con npm install)
+node_modules
+
+# Variables de entorno: contienen contraseñas. NUNCA se suben a GitHub.
+.env
+
+# Carpetas generadas al compilar
+dist
+
+# Archivos del sistema y del editor
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+*.log
