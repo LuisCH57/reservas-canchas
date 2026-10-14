@@ -1,7 +1,8 @@
 // ==========================================================
 // Crea un ADMINISTRADOR (o convierte en admin a un usuario existente).
-// Uso:
+// Uso (dos formas):
 //   npm run create-admin -- "Tu Nombre" tu@correo.com "TuContraseñaSegura"
+//   npm run create-admin      ← sin datos: usa ADMIN_EMAIL y ADMIN_PASSWORD del .env
 //
 // ¿Por qué un script y no una pantalla? Porque nadie desde internet debe
 // poder crearse un admin: solo quien tiene acceso al servidor y a .env.
@@ -9,10 +10,14 @@
 import { pool } from "../src/db.ts";
 import { hashPassword } from "../src/auth/password.ts";
 
-const [name, rawEmail, password] = process.argv.slice(2);
+const args = process.argv.slice(2);
+const name = args[0] ?? "Administrador";
+const rawEmail = args[1] ?? process.env.ADMIN_EMAIL;
+const password = args[2] ?? process.env.ADMIN_PASSWORD;
 
 if (!name || !rawEmail || !password) {
   console.error('Uso: npm run create-admin -- "Nombre" correo@ejemplo.com "contraseña"');
+  console.error("O completa ADMIN_EMAIL y ADMIN_PASSWORD en tu .env y ejecuta: npm run create-admin");
   process.exit(1);
 }
 if (password.length < 8) {

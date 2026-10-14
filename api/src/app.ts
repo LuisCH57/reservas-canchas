@@ -7,6 +7,9 @@ import express, { type NextFunction, type Request, type Response } from "express
 import { config } from "./config.ts";
 import { pool } from "./db.ts";
 import authRouter from "./routes/auth.ts";
+import courtsRouter from "./routes/courts.ts";
+import reservationsRouter from "./routes/reservations.ts";
+import adminRouter from "./routes/admin.ts";
 
 export const app = express();
 
@@ -42,6 +45,9 @@ app.get("/api/health", async (_req, res) => {
 });
 
 app.use("/api/auth", authRouter);
+app.use("/api/courts", courtsRouter); // públicas
+app.use("/api/reservations", reservationsRouter); // requieren sesión
+app.use("/api/admin", adminRouter); // requieren sesión y rol admin
 
 app.use((req, res) => {
   res.status(404).json({ error: `No existe la ruta ${req.method} ${req.url}` });

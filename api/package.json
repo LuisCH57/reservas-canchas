@@ -8,6 +8,7 @@
     "dev": "node --env-file=.env --watch src/server.ts",
     "start": "node src/server.ts",
     "typecheck": "tsc",
+    "test": "node --test --test-concurrency=1 \"test/**/*.test.ts\"",
     "create-admin": "node --env-file=.env scripts/create-admin.ts"
   },
   "engines": {
@@ -19,6 +20,8 @@
     "pg": "^8.23.1"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.10",
+    "@electric-sql/pglite-socket": "^0.2.13",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.0.0",

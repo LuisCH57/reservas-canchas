@@ -78,3 +78,109 @@ GET {{api}}/auth/me
 ### 10. ¿Quién soy? con un token FALSO (debe responder 401)
 GET {{api}}/auth/me
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwicm9sZSI6ImFkbWluIn0.firma-falsa
+
+# ==========================================================
+# RESERVAS (Etapa 3)
+# Antes: ejecuta la prueba 6 (login del cliente) para tener su token.
+# Cambia la fecha por una de los próximos días (formato AAAA-MM-DD).
+# ==========================================================
+
+@fecha = 2026-10-16
+
+### 11. Canchas activas (pública)
+GET {{api}}/courts
+
+### 12. Disponibilidad de un día (pública)
+GET {{api}}/courts/availability?date={{fecha}}
+
+### 13. Disponibilidad CON sesión: tus reservas aparecen como "mine"
+GET {{api}}/courts/availability?date={{fecha}}
+Authorization: Bearer {{login.response.body.token}}
+
+### 14. Reservar la cancha 1 a las 18:00
+# @name reserva
+POST {{api}}/reservations
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.token}}
+
+{
+  "courtId": 1,
+  "date": "{{fecha}}",
+  "startHour": 18
+}
+
+### 15. Reservar el MISMO horario otra vez (debe responder 409)
+POST {{api}}/reservations
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.token}}
+
+{
+  "courtId": 1,
+  "date": "{{fecha}}",
+  "startHour": 18
+}
+
+### 16. Reservar a las 6:00, antes de que abra la cancha (debe responder 400)
+POST {{api}}/reservations
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.token}}
+
+{
+  "courtId": 1,
+  "date": "{{fecha}}",
+  "startHour": 6
+}
+
+### 17. Mis reservas
+GET {{api}}/reservations/mine
+Authorization: Bearer {{login.response.body.token}}
+
+### 18. Cancelar la reserva creada en la prueba 14
+PATCH {{api}}/reservations/{{reserva.response.body.id}}/cancel
+Authorization: Bearer {{login.response.body.token}}
+
+### 19. Un CLIENTE intenta entrar al panel de admin (debe responder 403)
+GET {{api}}/admin/reservations?date={{fecha}}
+Authorization: Bearer {{login.response.body.token}}
+
+# ==========================================================
+# ADMINISTRACIÓN
+# El correo y la contraseña del admin se leen de tu archivo .env
+# (ADMIN_EMAIL y ADMIN_PASSWORD), para no guardarlos en GitHub.
+# ==========================================================
+
+### 20. Iniciar sesión como administrador
+# @name adminLogin
+POST {{api}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{$dotenv ADMIN_EMAIL}}",
+  "password": "{{$dotenv ADMIN_PASSWORD}}"
+}
+
+### 21. Reservas del día con los datos de cada cliente
+GET {{api}}/admin/reservations?date={{fecha}}
+Authorization: Bearer {{adminLogin.response.body.token}}
+
+### 22. Resumen del mes
+GET {{api}}/admin/summary
+Authorization: Bearer {{adminLogin.response.body.token}}
+
+### 23. Todas las canchas (también las inactivas)
+GET {{api}}/admin/courts
+Authorization: Bearer {{adminLogin.response.body.token}}
+
+### 24. Subir el precio de la cancha 3 a S/ 65.00
+PUT {{api}}/admin/courts/3
+Content-Type: application/json
+Authorization: Bearer {{adminLogin.response.body.token}}
+
+{
+  "name": "Cancha 3 - Fulbito",
+  "sport": "Fútbol",
+  "pricePerHourCents": 6500,
+  "openHour": 8,
+  "closeHour": 23,
+  "isActive": true
+}
